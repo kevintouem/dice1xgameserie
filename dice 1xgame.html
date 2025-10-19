@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100PEARLX - Lancer de Dés & Présentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Définitions des couleurs pour les thèmes */
+        :root {
+            /* Thème Sombre (par défaut) */
+            --bg: #07070a;
+            --bg-card: #1f2937; /* gray-800 */
+            --accent: #7c5cff;
+            --text-color: #e6eef8;
+            --text-secondary: #9ca3af; /* gray-400 */
+            --die-bg: #fff;
+            --die-text: #111;
+            --bg-overlay: linear-gradient(rgba(7, 7, 10, 0.75), rgba(7, 7, 10, 0.75)); /* Superposition pour le mode sombre */
+        }
+
+        .light-mode {
+            /* Thème Clair */
+            --bg: #f3f4f6; /* gray-100 */
+            --bg-card: #ffffff;
+            --accent: #4f46e5; /* indigo-600 */
+            --text-color: #111827; /* gray-900 */
+            --text-secondary: #4b5563; /* gray-600 */
+            --die-bg: #4f46e5; /* indigo-600 */
+            --die-text: #fff;
+            --bg-overlay: linear-gradient(rgba(243, 244, 246, 0.75), rgba(243, 244, 246, 0.75)); /* Superposition pour le mode clair */
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg); /* Couleur de secours */
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            
+            /* Configuration de l'image de fond */
+            background-image: var(--bg-overlay), url("Capture d'écran 2025-10-09 124009.jpg");
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* Styles de base pour les dés et le jeu */
+        .die {
+            width: 140px;
+            height: 140px;
+            border-radius: 1rem; /* 12px Tailwind rounded-xl */
+            background-color: var(--die-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem; /* 48px */
+            font-weight: 800; /* Extra bold */
+            color: var(--die-text);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: opacity 0.6s, transform 0.6s, background-color 0.3s, color 0.3s;
+            line-height: 1;
+        }
+
+        .spinning {
+            animation: spin 0.4s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden-die {
+            opacity: 0;
+            transform: scale(0.6);
+        }
+
+        .bubble {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 92, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen p-4 sm:p-8 flex flex-col items-center">
+        <!-- Barre de Navigation/Onglets -->
+        <div class="w-full max-w-4xl mb-8 flex border-b border-gray-700 light-mode:border-gray-300">
+            <button id="tab-presentation" class="tab-btn pb-2 px-4 text-sm sm:text-lg font-semibold tracking-wide border-b-2 transition duration-300" data-view="presentation" data-i18n="tab_presentation">
+                Présentation
+            </button>
+            <button id="tab-simulator" class="tab-btn pb-2 px-4 text-sm sm:text-lg font-semibold tracking-wide border-b-2 transition duration-300" data-view="simulator" data-i18n="tab_simulator">
+                Simulateur de Dés
+            </button>
+            <button id="tab-rules" class="tab-btn pb-2 px-4 text-sm sm:text-lg font-semibold tracking-wide border-b-2 transition duration-300" data-view="rules" data-i18n="tab_rules">
+                Règles
+            </button>
+            <button id="tab-instructions" class="tab-btn pb-2 px-4 text-sm sm:text-lg font-semibold tracking-wide border-b-2 transition duration-300" data-view="instructions" data-i18n="tab_instructions">
+                Instructions
+            </button>
+            <button id="tab-options" class="tab-btn pb-2 px-4 text-sm sm:text-lg font-semibold tracking-wide border-b-2 transition duration-300" data-view="options" data-i18n="tab_options">
+                Options
+            </button>
+        </div>
+
+        <!-- Vues de l'application -->
+
+        <!-- Vue Présentation -->
+        <div id="view-presentation" class="w-full max-w-4xl space-y-8">
+             <!-- Sélecteur de Langue (i18n) -->
+            <div class="flex justify-end mb-4">
+                <div class="flex items-center space-x-2">
+                    <label for="language-select" class="text-gray-400 light-mode:text-gray-600 text-sm" data-i18n="label_langue">Langue:</label>
+                    <select id="language-select" class="bg-gray-800 light-mode:bg-gray-200 text-white light-mode:text-gray-900 rounded-md p-1.5 border border-gray-700 light-mode:border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <option value="fr">Français (FR)</option>
+                        <option value="en">English (EN)</option>
+                        <option value="so">Soomaali (SO)</option>
+                        <option value="ar">العربية (AR)</option>
+                        <option value="it">Italiano (IT)</option>
+                        <option value="ru">Русский (RU)</option>
+                        <option value="ja">日本語 (JA)</option>
+                    </select>
+                </div>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white light-mode:text-gray-900" data-i18n="title_presentation">Présentation des éléments</h1>
+            <p class="text-lg text-gray-300 light-mode:text-gray-700" data-i18n="desc_presentation">Cette page regroupe les liens rapides et les informations clés du projet.</p>
+
+            <!-- Bulles de Navigation (Original) -->
+            <div class="bubbles flex flex-wrap gap-4 sm:gap-6 justify-center sm:justify-start">
+                <!-- Mise à jour des onclick pour la navigation interne -->
+                <div class="bubble w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-indigo-500/20 hover:bg-indigo-500/30 flex items-center justify-center font-bold text-center cursor-pointer p-4" onclick="switchView('simulator')">
+                    <span class="text-base sm:text-lg" data-i18n="bubble_lancer_des">Lancer les dés</span>
+                </div>
+                <div class="bubble w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 flex items-center justify-center font-bold text-center cursor-pointer p-4" onclick="switchView('rules')">
+                    <span class="text-base sm:text-lg" data-i18n="bubble_regles">Règles</span>
+                </div>
+                <div class="bubble w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-purple-500/20 hover:bg-purple-500/30 flex items-center justify-center font-bold text-center cursor-pointer p-4" onclick="switchView('instructions')">
+                    <span class="text-base sm:text-lg" data-i18n="bubble_instructions">Instructions</span>
+                </div>
+                <div class="bubble w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-pink-500/20 hover:bg-pink-500/30 flex items-center justify-center font-bold text-center cursor-pointer p-4" onclick="switchView('options')">
+                    <span class="text-base sm:text-lg" data-i18n="bubble_options">Options</span>
+                </div>
+                <button class="bubble w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-yellow-500/20 hover:bg-yellow-500/30 flex items-center justify-center font-bold text-center p-4 text-yellow-300 light-mode:text-yellow-700" id="copyBubbleCode">
+                    <span class="text-base sm:text-lg" data-i18n="bubble_copier_code">Copier Code Promo</span>
+                </button>
+            </div>
+
+            <!-- Informations Promo et Telegram -->
+            <div class="mt-8 pt-4 border-t border-gray-800 light-mode:border-gray-300 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 text-lg">
+                <div class="flex items-center gap-2">
+                    <span data-i18n="label_promo">Promo:</span> <strong id="promoCode" class="text-green-400 light-mode:text-green-600">100PEARLX</strong>
+                    <button id="copyPromo" class="ml-2 bg-gray-700 light-mode:bg-gray-300 hover:bg-gray-600 light-mode:hover:bg-gray-400 text-white light-mode:text-gray-900 text-xs font-semibold py-1.5 px-3 rounded-full transition duration-150" data-i18n="btn_copier">
+                        Copier
+                    </button>
+                    <span id="copyMessage" class="text-sm text-green-400 light-mode:text-green-600 opacity-0 transition duration-300 ml-2" data-i18n="msg_copie">Copié!</span>
+                </div>
+                <a href="https://t.me/laCROSSE100PEARLX" target="_blank" class="text-blue-400 hover:text-blue-300 light-mode:text-blue-600 light-mode:hover:text-blue-700 font-semibold flex items-center gap-1 transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.42l-9.83 5.88l-9.83-5.88l4.4-2.64l5.43 3.25l5.43-3.25z"/><path d="M12 2v6.42l4.4-2.64M12 8.42l-4.4-2.64"/></svg>
+                    Telegram
+                </a>
+            </div>
+        </div>
+
+        <!-- Vue Simulateur de Dés -->
+        <div id="view-simulator" class="w-full max-w-4xl space-y-8 hidden">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white light-mode:text-gray-900" data-i18n="title_simulator">Lancer les dés</h1>
+            <p class="text-lg text-gray-400 light-mode:text-gray-600" data-i18n="desc_simulator">Appuyez sur "Lancer" pour faire tourner deux dés. Le résultat indique si la somme est supérieure, égale ou inférieure à 7.</p>
+
+            <div class="board flex flex-col md:flex-row items-center gap-8 p-6 bg-gray-900/50 light-mode:bg-gray-100 rounded-xl shadow-2xl">
+                <!-- Dés -->
+                <div class="flex gap-6">
+                    <div class="die" id="die1">?</div>
+                    <div class="die" id="die2">?</div>
+                </div>
+
+                <!-- Commandes et Résultat -->
+                <div class="flex flex-col gap-4">
+                    <button id="rollBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-200 uppercase tracking-wider disabled:opacity-50" data-i18n="btn_lancer_des">
+                        Lancer les dés
+                    </button>
+                    <div class="result p-4 rounded-lg font-mono text-center text-lg shadow-inner border border-gray-700 light-mode:border-gray-300" id="status" data-i18n="status_pret">
+                        Prêt
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vue Règles -->
+        <div id="view-rules" class="w-full max-w-4xl space-y-8 hidden">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white light-mode:text-gray-900" data-i18n="title_rules">Règles du Jeu</h1>
+            <p class="text-lg text-gray-400 light-mode:text-gray-600" data-i18n="desc_rules">
+                Ceci est la section des règles. Vous pouvez éditer ce texte pour décrire en détail le fonctionnement du jeu (paris, gains, etc.).
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-gray-300 light-mode:text-gray-700 ml-4">
+                <li data-i18n="rule_1">Règle 1: Définir l'objectif.</li>
+                <li data-i18n="rule_2">Règle 2: Détails du pari (Supérieur à 7, Inférieur à 7, Égal à 7).</li>
+                <li data-i18n="rule_3">Règle 3: Paiements et conditions de victoire.</li>
+            </ul>
+        </div>
+
+        <!-- Vue Instructions -->
+        <div id="view-instructions" class="w-full max-w-4xl space-y-8 hidden">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white light-mode:text-gray-900" data-i18n="title_instructions">Instructions d'Utilisation</h1>
+            <p class="text-lg text-gray-400 light-mode:text-gray-600" data-i18n="desc_instructions">
+                Ceci est la section des instructions. Expliquez ici comment utiliser le simulateur et le reste de l'application.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-gray-300 light-mode:text-gray-700 ml-4">
+                <li data-i18n="instruction_1">Sélectionnez l'onglet "Simulateur de Dés".</li>
+                <li data-i18n="instruction_2">Appuyez sur le bouton "Lancer les dés".</li>
+                <li data-i18n="instruction_3">Observez le résultat qui s'affiche.</li>
+            </ol>
+        </div>
+
+        <!-- Vue Options -->
+        <div id="view-options" class="w-full max-w-4xl space-y-8 hidden">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white light-mode:text-gray-900" data-i18n="title_options">Options & Paramètres</h1>
+            <p class="text-lg text-gray-400 light-mode:text-gray-600" data-i18n="desc_options">
+                Configurez l'apparence et le comportement du simulateur ici.
+            </p>
+
+            <div class="space-y-4">
+                <!-- Option 1: Mode Sombre / Clair -->
+                <div class="p-5 bg-gray-800 light-mode:bg-white rounded-xl shadow-lg border border-gray-700 light-mode:border-gray-300">
+                    <label for="theme-switch" class="text-white light-mode:text-gray-900 flex items-center justify-between cursor-pointer">
+                        <span class="font-semibold" data-i18n="label_dark_mode">Mode Sombre Actif</span>
+                        <input type="checkbox" id="theme-switch" checked class="form-checkbox h-6 w-6 text-indigo-600 bg-gray-700 light-mode:bg-gray-200 border-gray-600 light-mode:border-gray-400 rounded-full appearance-none checked:bg-indigo-600 transition duration-300 ease-in-out">
+                    </label>
+                    <p class="text-sm text-gray-400 light-mode:text-gray-600 mt-1" data-i18n="desc_dark_mode">Bascule entre le thème sombre (sombre) et le thème clair (jour).</p>
+                </div>
+
+                <!-- Option 2: Contrôle du Volume -->
+                <div class="p-5 bg-gray-800 light-mode:bg-white rounded-xl shadow-lg border border-gray-700 light-mode:border-gray-300 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-white light-mode:text-gray-900" data-i18n="label_volume">Volume sonore</span>
+                        <button id="mute-btn" class="text-indigo-400 hover:text-indigo-300 transition duration-150" aria-label="Mute/Unmute">
+                            <svg id="volume-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5" class="w-full h-2 bg-gray-700 light-mode:bg-gray-300 rounded-lg appearance-none cursor-pointer range-lg">
+                    <p class="text-sm text-gray-400 light-mode:text-gray-600 mt-1" data-i18n="desc_volume">Ajustez le niveau sonore des effets du simulateur.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DONNÉES DE TRADUCTION (i18n) ---
+        const translations = {
+            fr: {
+                // Onglets
+                tab_presentation: "Présentation", tab_simulator: "Simulateur de Dés", tab_rules: "Règles", tab_instructions: "Instructions", tab_options: "Options",
+                // Présentation
+                label_langue: "Langue:", title_presentation: "Présentation des éléments", desc_presentation: "Cette page regroupe les liens rapides et les informations clés du projet.",
+                bubble_lancer_des: "Lancer les dés", bubble_regles: "Règles", bubble_instructions: "Instructions", bubble_options: "Options", bubble_copier_code: "Copier Code Promo",
+                label_promo: "Promo:", btn_copier: "Copier", msg_copie: "Copié!",
+                // Simulateur
+                title_simulator: "Lancer les dés", desc_simulator: "Appuyez sur \"Lancer\" pour faire tourner deux dés. Le résultat indique si la somme est supérieure, égale ou inférieure à 7.",
+                btn_lancer_des: "Lancer les dés", status_pret: "Prêt", status_en_cours: "En cours...",
+                verdict_superior: "Supérieur à 7", verdict_inferior: "Inférieur à 7", verdict_equal: "Égal à 7",
+                // Règles
+                title_rules: "Règles du Jeu", desc_rules: "Ceci est la section des règles. Vous pouvez éditer ce texte pour décrire en détail le fonctionnement du jeu (paris, gains, etc.).",
+                rule_1: "Règle 1: Définir l'objectif.", rule_2: "Règle 2: Détails du pari (Supérieur à 7, Inférieur à 7, Égal à 7).", rule_3: "Règle 3: Paiements et conditions de victoire.",
+                // Instructions
+                title_instructions: "Instructions d'Utilisation", desc_instructions: "Ceci est la section des instructions. Expliquez ici comment utiliser le simulateur et le reste de l'application.",
+                instruction_1: "Sélectionnez l'onglet \"Simulateur de Dés\".", instruction_2: "Appuyez sur le bouton \"Lancer les dés\".", instruction_3: "Observez le résultat qui s'affiche.",
+                // Options
+                title_options: "Options & Paramètres", desc_options: "Configurez l'apparence et le comportement du simulateur ici.",
+                label_dark_mode: "Mode Sombre Actif", desc_dark_mode: "Bascule entre le thème sombre (sombre) et le thème clair (jour).",
+                label_volume: "Volume sonore", desc_volume: "Ajustez le niveau sonore des effets du simulateur.",
+            },
+            en: {
+                // Tabs
+                tab_presentation: "Presentation", tab_simulator: "Dice Simulator", tab_rules: "Rules", tab_instructions: "Instructions", tab_options: "Options",
+                // Presentation
+                label_langue: "Language:", title_presentation: "Element Presentation", desc_presentation: "This page groups quick links and key project information.",
+                bubble_lancer_des: "Roll the Dice", bubble_regles: "Rules", bubble_instructions: "Instructions", bubble_options: "Options", bubble_copier_code: "Copy Promo Code",
+                label_promo: "Promo:", btn_copier: "Copy", msg_copie: "Copied!",
+                // Simulator
+                title_simulator: "Roll the Dice", desc_simulator: "Press 'Roll' to spin two dice. The result indicates if the sum is greater than, equal to, or less than 7.",
+                btn_lancer_des: "Roll the Dice", status_pret: "Ready", status_en_cours: "In Progress...",
+                verdict_superior: "Greater than 7", verdict_inferior: "Less than 7", verdict_equal: "Equal to 7",
+                // Rules
+                title_rules: "Game Rules", desc_rules: "This is the rules section. You can edit this text to describe in detail how the game works (bets, winnings, etc.).",
+                rule_1: "Rule 1: Define the objective.", rule_2: "Rule 2: Betting details (Greater than 7, Less than 7, Equal to 7).", rule_3: "Rule 3: Payouts and win conditions.",
+                // Instructions
+                title_instructions: "Usage Instructions", desc_instructions: "This is the instructions section. Explain here how to use the simulator and the rest of the application.",
+                instruction_1: "Select the 'Dice Simulator' tab.", instruction_2: "Press the 'Roll the Dice' button.", instruction_3: "Observe the displayed result.",
+                // Options
+                title_options: "Options & Settings", desc_options: "Configure the appearance and behavior of the simulator here.",
+                label_dark_mode: "Dark Mode Active", desc_dark_mode: "Toggle between dark mode (night) and light mode (day) theme.",
+                label_volume: "Sound Volume", desc_volume: "Adjust the sound level of the simulator effects.",
+            },
+            // Les langues supplémentaires utilisent l'anglais comme base de repli (fallback)
+            so: {
+                tab_presentation: "Hordhaca", tab_simulator: "Ku dayashada Xabadaha", tab_rules: "Xeerarka", tab_instructions: "Tilmaamaha", tab_options: "Ikhtiyaarrada",
+                label_langue: "Luqadda:", title_presentation: "Bandhigidda Qaybaha", desc_presentation: "Boggaan wuxuu isku xiraa xiriirada degdegga ah iyo macluumaadka muhiimka ah ee mashruuca.",
+                bubble_lancer_des: "Lulida Xabadaha", bubble_regles: "Xeerarka", bubble_instructions: "Tilmaamaha", bubble_options: "Ikhtiyaarrada", bubble_copier_code: "Nuqul Koodhka Dhiirrigelinta",
+                label_promo: "Dhiirrigelin:", btn_copier: "Nuqul", msg_copie: "La nuqulay!",
+                title_simulator: "Lulida Xabadaha", desc_simulator: "Riix 'Lulida' si aad u rogto laba xabbo. Natiijadu waxay tilmaamaysaa in wadarta ay ka weyn tahay, la mid tahay, ama ka yar tahay 7.",
+                btn_lancer_des: "Lulida Xabadaha", status_pret: "Diyaar", status_en_cours: "Socda...",
+                verdict_superior: "Ka sarreeya 7", verdict_inferior: "Ka hooseeya 7", verdict_equal: "Laba siman 7",
+                title_rules: "Xeerarka Ciyaarta", desc_rules: "Tani waa qaybta xeerarka. Waad wax ka beddeli kartaa qoraalkan si aad si faahfaahsan uga warbixiso sida ciyaartu u shaqeyso (sharadka, guulaha, iwm.).",
+                rule_1: "Xeerka 1: Qeex ujeeddada.", rule_2: "Xeerka 2: Faahfaahinta sharadka (Ka sarreeya 7, Ka hooseeya 7, Laba siman 7).", rule_3: "Xeerka 3: Bixinta iyo shuruudaha guusha.",
+                title_instructions: "Tilmaamaha Isticmaalka", desc_instructions: "Tani waa qaybta tilmaamaha. Ku sharax halkan sida loo isticmaalo simulator-ka iyo inta kale ee app-ka.",
+                instruction_1: "Dooro tabka \"Ku dayashada Xabadaha\".", instruction_2: "Riix badhanka \"Lulida Xabadaha\".", instruction_3: "Fiiri natiijada muuqata.",
+                title_options: "Ikhtiyaarrada & Dejinta", desc_options: "Halkan ku hagaaji muuqaalka iyo habdhaqanka simulator-ka.",
+                label_dark_mode: "Habka Mugdiga ah ee Firfircoon", desc_dark_mode: "Kala wareeg mawduuca mugdiga ah (habeen) iyo mawduuca fudud (maalin).",
+                label_volume: "Codka", desc_volume: "Hagaaji heerka codka ee saamaynta simulator-ka.",
+            },
+            ar: {
+                tab_presentation: "تقديم", tab_simulator: "محاكي النرد", tab_rules: "القواعد", tab_instructions: "التعليمات", tab_options: "الخيارات",
+                label_langue: "اللغة:", title_presentation: "عرض العناصر", desc_presentation: "تجمع هذه الصفحة الروابط السريعة والمعلومات الأساسية للمشروع.",
+                bubble_lancer_des: "رمي النرد", bubble_regles: "القواعد", bubble_instructions: "التعليمات", bubble_options: "الخيارات", bubble_copier_code: "نسخ رمز الترويج",
+                label_promo: "الترويج:", btn_copier: "نسخ", msg_copie: "تم النسخ!",
+                title_simulator: "رمي النرد", desc_simulator: "اضغط على 'رمي' لتدوير نردين. تشير النتيجة إلى ما إذا كان المجموع أكبر من أو يساوي أو أقل من 7.",
+                btn_lancer_des: "رمي النرد", status_pret: "جاهز", status_en_cours: "قيد التقدم...",
+                verdict_superior: "أكبر من 7", verdict_inferior: "أصغر من 7", verdict_equal: "يساوي 7",
+                title_rules: "قواعد اللعبة", desc_rules: "هذا هو قسم القواعد. يمكنك تعديل هذا النص لوصف كيفية عمل اللعبة بالتفصيل (الرهانات، المكاسب، إلخ).",
+                rule_1: "القاعدة 1: تحديد الهدف.", rule_2: "القاعدة 2: تفاصيل الرهان (أكبر من 7، أصغر من 7، يساوي 7).", rule_3: "القاعدة 3: المدفوعات وشروط الفوز.",
+                title_instructions: "تعليمات الاستخدام", desc_instructions: "هذا هو قسم التعليمات. اشرح هنا كيفية استخدام المحاكي وبقية التطبيق.",
+                instruction_1: "حدد علامة التبويب \"محاكي النرد\".", instruction_2: "اضغط على زر \"رمي النرد\".", instruction_3: "راقب النتيجة المعروضة.",
+                title_options: "الخيارات والإعدادات", desc_options: "قم بتكوين مظهر وسلوك المحاكي هنا.",
+                label_dark_mode: "الوضع الداكن نشط", desc_dark_mode: "التبديل بين السمة الداكنة (ليل) والسمة الفاتحة (نهار).",
+                label_volume: "مستوى الصوت", desc_volume: "اضبط مستوى صوت تأثيرات المحاكي.",
+            },
+            it: {
+                tab_presentation: "Presentazione", tab_simulator: "Simulatore di Dadi", tab_rules: "Regole", tab_instructions: "Istruzioni", tab_options: "Opzioni",
+                label_langue: "Lingua:", title_presentation: "Presentazione Elementi", desc_presentation: "Questa pagina raggruppa collegamenti rapidi e informazioni chiave del progetto.",
+                bubble_lancer_des: "Lancia i dadi", bubble_regles: "Regole", bubble_instructions: "Istruzioni", bubble_options: "Opzioni", bubble_copier_code: "Copia Codice Promozione",
+                label_promo: "Promozione:", btn_copier: "Copia", msg_copie: "Copiato!",
+                title_simulator: "Lancia i dadi", desc_simulator: "Premi 'Lancia' per far girare due dadi. Il risultato indica se la somma è maggiore, uguale o minore di 7.",
+                btn_lancer_des: "Lancia i dadi", status_pret: "Pronto", status_en_cours: "In corso...",
+                verdict_superior: "Maggiore di 7", verdict_inferior: "Minore di 7", verdict_equal: "Uguale a 7",
+                title_rules: "Regole del Gioco", desc_rules: "Questa è la sezione delle regole. Puoi modificare questo testo per descrivere in dettaglio il funzionamento del gioco (scommesse, vincite, ecc.).",
+                rule_1: "Regola 1: Definire l'obiettivo.", rule_2: "Regola 2: Dettagli della scommessa (Maggiore di 7, Minore di 7, Uguale a 7).", rule_3: "Regola 3: Pagamenti e condizioni di vittoria.",
+                title_instructions: "Istruzioni per l'Uso", desc_instructions: "Questa è la sezione delle istruzioni. Spiega qui come utilizzare il simulatore e il resto dell'applicazione.",
+                instruction_1: "Seleziona la scheda \"Simulatore di Dadi\".", instruction_2: "Premi il pulsante \"Lancia i dadi\".", instruction_3: "Osserva il risultato visualizzato.",
+                title_options: "Opzioni e Impostazioni", desc_options: "Configura l'aspetto e il comportamento del simulatore qui.",
+                label_dark_mode: "Modalità Scura Attiva", desc_dark_mode: "Passa dal tema scuro (notte) al tema chiaro (giorno).",
+                label_volume: "Volume Audio", desc_volume: "Regola il livello audio degli effetti del simulatore.",
+            },
+            ru: {
+                tab_presentation: "Презентация", tab_simulator: "Симулятор Кубиков", tab_rules: "Правила", tab_instructions: "Инструкции", tab_options: "Опции",
+                label_langue: "Язык:", title_presentation: "Представление Элементов", desc_presentation: "Эта страница объединяет быстрые ссылки и ключевую информацию о проекте.",
+                bubble_lancer_des: "Бросить кости", bubble_regles: "Правила", bubble_instructions: "Инструкции", bubble_options: "Опции", bubble_copier_code: "Копировать Промокод",
+                label_promo: "Промо:", btn_copier: "Копировать", msg_copie: "Скопировано!",
+                title_simulator: "Бросить кости", desc_simulator: "Нажмите 'Бросить', чтобы вращать два кубика. Результат показывает, превышает ли сумма 7, равна ли она 7 или меньше.",
+                btn_lancer_des: "Бросить кости", status_pret: "Готов", status_en_cours: "В процессе...",
+                verdict_superior: "Больше 7", verdict_inferior: "Меньше 7", verdict_equal: "Равно 7",
+                title_rules: "Правила Игры", desc_rules: "Это раздел правил. Вы можете отредактировать этот текст, чтобы подробно описать, как работает игра (ставки, выигрыши и т. д.).",
+                rule_1: "Правило 1: Определите цель.", rule_2: "Правило 2: Детали ставки (Больше 7, Меньше 7, Равно 7).", rule_3: "Правило 3: Выплаты и условия победы.",
+                title_instructions: "Инструкции по Использованию", desc_instructions: "Это раздел инструкций. Объясните здесь, как пользоваться симулятором и остальной частью приложения.",
+                instruction_1: "Выберите вкладку \"Симулятор Кубиков\".", instruction_2: "Нажмите кнопку \"Бросить кости\".", instruction_3: "Наблюдайте за отображаемым результатом.",
+                title_options: "Опции и Настройки", desc_options: "Настройте внешний вид и поведение симулятора здесь.",
+                label_dark_mode: "Активен Темный Режим", desc_dark_mode: "Переключение между темной (ночной) и светлой (дневной) темой.",
+                label_volume: "Громкость звука", desc_volume: "Отрегулируйте уровень громкости эффектов симулятора.",
+            },
+            ja: {
+                tab_presentation: "プレゼンテーション", tab_simulator: "サイコロシミュレーター", tab_rules: "ルール", tab_instructions: "説明書", tab_options: "オプション",
+                label_langue: "言語:", title_presentation: "要素の提示", desc_presentation: "このページには、クイックリンクとプロジェクトの主要情報がグループ化されています。",
+                bubble_lancer_des: "サイコロを振る", bubble_regles: "ルール", bubble_instructions: "説明書", bubble_options: "オプション", bubble_copier_code: "プロモーションコードをコピー",
+                label_promo: "プロモ:", btn_copier: "コピー", msg_copie: "コピーしました!",
+                title_simulator: "サイコロを振る", desc_simulator: "「振る」を押して2つのサイコロを回します。結果は、合計が7より大きいか、等しいか、または小さいかを示します。",
+                btn_lancer_des: "サイコロを振る", status_pret: "準備完了", status_en_cours: "進行中...",
+                verdict_superior: "7より大きい", verdict_inferior: "7未満", verdict_equal: "7と等しい",
+                title_rules: "ゲームのルール", desc_rules: "これはルールセクションです。このテキストを編集して、ゲームがどのように機能するか（賭け、賞金など）を詳細に説明できます。",
+                rule_1: "ルール 1: 目標を定義します。", rule_2: "ルール 2: 賭けの詳細（7より大きい、7未満、7と等しい）。", rule_3: "ルール 3: 支払いと勝利条件。",
+                title_instructions: "使用説明書", desc_instructions: "これは説明書セクションです。シミュレーターとアプリケーションの残りの部分の使用方法をここで説明します。",
+                instruction_1: "「サイコロシミュレーター」タブを選択します。", instruction_2: "「サイコロを振る」ボタンを押します。", instruction_3: "表示される結果を観察します。",
+                title_options: "オプションと設定", desc_options: "ここでシミュレーターの外観と動作を設定します。",
+                label_dark_mode: "ダークモードがアクティブ", desc_dark_mode: "ダークモード（夜）とライトモード（昼）のテーマを切り替えます。",
+                label_volume: "音量", desc_volume: "シミュレーター効果の音量を調整します。",
+            }
+        };
+
+        // --- Fonctions de Traduction ---
+
+        let currentLang = 'fr'; // Défaut : Français
+
+        function getTranslation(key) {
+            // Tente de récupérer la traduction spécifique. Si elle n'existe pas, utilise l'anglais (fallback)
+            return translations[currentLang]?.[key] || translations['en'][key] || key;
+        }
+
+        function applyTranslations(lang) {
+            currentLang = lang;
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const text = getTranslation(key);
+
+                // Pour les éléments simples comme <h1>, <p>, <span>
+                if (el.tagName !== 'INPUT' && el.tagName !== 'BUTTON' && el.tagName !== 'OPTION') {
+                    el.textContent = text;
+                }
+                
+                // Pour les boutons
+                if (el.tagName === 'BUTTON' && el.id !== 'mute-btn') { // Exclure le bouton Mute qui contient une icône SVG
+                    el.textContent = text;
+                }
+
+                // Cas particulier : le champ de statut, on veut qu'il soit sur 'Prêt' dans la nouvelle langue
+                if (el.id === 'status') {
+                    el.textContent = getTranslation('status_pret');
+                }
+            });
+
+            // Gérer le titre de la page
+            document.title = getTranslation('tab_presentation') + " - " + getTranslation('tab_simulator');
+            
+            // S'assurer que le sélecteur affiche la langue correcte après le changement
+            if (langSelect) {
+                langSelect.value = lang;
+            }
+        }
+
+        // --- Variables Globales et Initialisation (suite) ---
+        const promoCodeValue = '100PEARLX';
+        const views = {
+            presentation: document.getElementById('view-presentation'),
+            simulator: document.getElementById('view-simulator'),
+            rules: document.getElementById('view-rules'),
+            instructions: document.getElementById('view-instructions'),
+            options: document.getElementById('view-options')
+        };
+        const tabs = {
+            presentation: document.getElementById('tab-presentation'),
+            simulator: document.getElementById('tab-simulator'),
+            rules: document.getElementById('tab-rules'),
+            instructions: document.getElementById('tab-instructions'),
+            options: document.getElementById('tab-options')
+        };
+
+        // Éléments du simulateur
+        const die1 = document.getElementById('die1');
+        const die2 = document.getElementById('die2');
+        const status = document.getElementById('status');
+        const rollBtn = document.getElementById('rollBtn');
+        const langSelect = document.getElementById('language-select');
+
+        // Éléments des options
+        const themeSwitch = document.getElementById('theme-switch');
+        const volumeSlider = document.getElementById('volume-slider');
+        const muteBtn = document.getElementById('mute-btn');
+        const volumeIcon = document.getElementById('volume-icon');
+
+        // Variables d'état
+        let currentView = 'presentation';
+        let isMuted = false;
+        let lastVolume = 0.5; // Stocke la dernière valeur de volume avant mute
+
+        // --- Fonctions de Vue ---
+        function switchView(viewName) {
+            // Cacher toutes les vues et désactiver tous les onglets
+            Object.keys(views).forEach(key => {
+                views[key].classList.add('hidden');
+                // Retrait des classes actives pour les onglets
+                if (tabs[key]) {
+                    tabs[key].classList.remove('border-indigo-500', 'text-indigo-400', 'light-mode:border-indigo-600', 'light-mode:text-indigo-600');
+                    tabs[key].classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-200', 'light-mode:text-gray-500', 'light-mode:hover:text-gray-800');
+                }
+            });
+
+            // Afficher la vue demandée et activer l'onglet correspondant
+            if (views[viewName]) {
+                views[viewName].classList.remove('hidden');
+            }
+            if (tabs[viewName]) {
+                // Ajout des classes actives pour l'onglet correspondant
+                tabs[viewName].classList.add('border-indigo-500', 'text-indigo-400', 'light-mode:border-indigo-600', 'light-mode:text-indigo-600');
+                tabs[viewName].classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-200', 'light-mode:text-gray-500', 'light-mode:hover:text-gray-800');
+                currentView = viewName;
+            }
+        }
+
+        // --- Logique du Thème ---
+
+        function applyTheme(isLight) {
+            if (isLight) {
+                document.body.classList.add('light-mode');
+                themeSwitch.checked = false;
+                localStorage.setItem('appTheme', 'light');
+            } else {
+                document.body.classList.remove('light-mode');
+                themeSwitch.checked = true;
+                localStorage.setItem('appTheme', 'dark');
+            }
+            // Mettre à jour le label du switch dans la langue courante
+            const labelElement = document.querySelector('[data-i18n="label_dark_mode"]');
+            if (labelElement) {
+                labelElement.textContent = getTranslation('label_dark_mode'); // Force la mise à jour
+                if (isLight) {
+                    // Si en mode clair, le label doit indiquer "Mode Sombre Inactif"
+                    labelElement.textContent = labelElement.textContent.replace("Actif", "Inactif").replace("Active", "Inactive");
+                } else {
+                    // Si en mode sombre, le label doit indiquer "Mode Sombre Actif"
+                    labelElement.textContent = labelElement.textContent.replace("Inactif", "Actif").replace("Inactive", "Active");
+                }
+            }
+        }
+
+        function toggleTheme() {
+            const isLight = document.body.classList.contains('light-mode');
+            applyTheme(!isLight);
+        }
+
+        // --- Logique du Volume ---
+        // Les fonctions audio réelles ne sont pas implémentées (pas d'AudioContext pour les effets),
+        // mais l'interface est fonctionnelle et prête.
+
+        function updateVolumeIcon(volume) {
+            let svgContent = '';
+            if (isMuted || volume == 0) {
+                // Mute icon
+                svgContent = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" y1="9" x2="16" y2="15"></line><line x1="16" y1="9" x2="22" y2="15"></line>';
+            } else if (volume > 0.5) {
+                // Volume Max icon (volume-2)
+                svgContent = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+            } else {
+                // Volume Min icon (volume-1)
+                svgContent = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+            }
+            volumeIcon.innerHTML = svgContent;
+        }
+
+        function handleVolumeChange(event) {
+            const volume = parseFloat(event.target.value);
+            localStorage.setItem('appVolume', volume);
+            isMuted = volume === 0;
+            updateVolumeIcon(volume);
+        }
+
+        function toggleMute() {
+            if (isMuted) {
+                // Unmute
+                const volume = lastVolume > 0 ? lastVolume : 0.5;
+                volumeSlider.value = volume;
+                isMuted = false;
+            } else {
+                // Mute
+                lastVolume = parseFloat(volumeSlider.value);
+                volumeSlider.value = 0;
+                isMuted = true;
+            }
+            // Trigger change handler to update icon and localStorage
+            volumeSlider.dispatchEvent(new Event('change'));
+        }
+
+        // --- Fonction de Copie ---
+        function copyText(text, messageElement) {
+            try {
+                navigator.clipboard.writeText(text).then(() => {
+                    // Afficher le message 'Copié!' dans la langue actuelle
+                    messageElement.textContent = getTranslation('msg_copie');
+                    messageElement.classList.remove('opacity-0');
+                    messageElement.classList.add('opacity-100');
+                    setTimeout(() => {
+                        messageElement.classList.remove('opacity-100');
+                        messageElement.classList.add('opacity-0');
+                    }, 1500);
+                }).catch(err => {
+                    console.error('Erreur de copie (Clipboard API):', err);
+                });
+            } catch (err) {
+                 // Fallback pour les environnements restreints (comme certains iframes)
+                 const textarea = document.createElement('textarea');
+                 textarea.value = text;
+                 document.body.appendChild(textarea);
+                 textarea.select();
+                 document.execCommand('copy');
+                 document.body.removeChild(textarea);
+                 
+                 messageElement.textContent = getTranslation('msg_copie');
+                 messageElement.classList.remove('opacity-0');
+                 messageElement.classList.add('opacity-100');
+                 setTimeout(() => {
+                     messageElement.classList.remove('opacity-100');
+                     messageElement.classList.add('opacity-0');
+                 }, 1500);
+            }
+        }
+
+        // --- Logique du Simulateur de Dés ---
+        function randFace() {
+            return 1 + Math.floor(Math.random() * 6);
+        }
+
+        function spinDice() {
+            rollBtn.disabled = true;
+
+            // 1. Démarrer l'animation de rotation
+            die1.classList.add('spinning');
+            die2.classList.add('spinning');
+            status.textContent = getTranslation('status_en_cours');
+            // Réinitialiser la classe pour la rotation
+            status.className = 'result p-4 rounded-lg font-mono text-center text-lg shadow-inner border border-gray-700 light-mode:border-gray-300 text-white light-mode:text-gray-900';
+
+            // 2. Afficher les faces aléatoires rapidement
+            const interval = setInterval(() => {
+                die1.textContent = randFace();
+                die2.textContent = randFace();
+            }, 80);
+
+            // 3. Arrêter l'animation après une durée aléatoire (1.2s à 2s)
+            const duration = 1200 + Math.floor(Math.random() * 800);
+            setTimeout(() => {
+                clearInterval(interval);
+
+                // 4. Déterminer les faces finales (logique uniquement)
+                const f1 = randFace();
+                const f2 = randFace();
+
+                // 5. Arrêter l'animation CSS
+                die1.classList.remove('spinning');
+                die2.classList.remove('spinning');
+                
+                // 6. Masquer les dés immédiatement et afficher le résultat
+                die1.classList.add('hidden-die');
+                die2.classList.add('hidden-die');
+                    
+                const sum = f1 + f2;
+                let msgKey = '';
+                let statusClass = 'text-white'; // Base class
+
+                if (sum > 7) {
+                    msgKey = 'verdict_superior';
+                    statusClass = 'text-green-400 bg-green-900/30 border-green-700';
+                } else if (sum < 7) {
+                    msgKey = 'verdict_inferior';
+                    statusClass = 'text-red-400 bg-red-900/30 border-red-700';
+                } else {
+                    msgKey = 'verdict_equal';
+                    statusClass = 'text-yellow-400 bg-yellow-900/30 border-yellow-700';
+                }
+                
+                status.textContent = getTranslation(msgKey);
+                // Mise à jour de la classe de statut (supprime les classes light-mode par défaut)
+                status.className = 'result p-4 rounded-lg font-mono text-center text-lg shadow-inner border ' + statusClass;
+                rollBtn.disabled = false;
+            }, duration);
+        }
+
+        // --- Initialisation et Écouteurs d'Événements ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. Initialisation de la Langue ---
+            const savedLang = localStorage.getItem('appLang') || 'fr';
+            applyTranslations(savedLang);
+
+            // --- 2. Initialisation du Thème ---
+            const savedTheme = localStorage.getItem('appTheme') || 'dark';
+            applyTheme(savedTheme === 'light'); // Applique le thème initial
+
+            // --- 3. Initialisation du Volume ---
+            const savedVolume = localStorage.getItem('appVolume') ? parseFloat(localStorage.getItem('appVolume')) : 0.5;
+            volumeSlider.value = savedVolume;
+            isMuted = savedVolume === 0;
+            updateVolumeIcon(savedVolume);
+
+            // --- 4. Configuration des Écouteurs ---
+
+            // Navigation
+            switchView('presentation'); // Afficher la vue initiale
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const viewName = button.getAttribute('data-view');
+                    switchView(viewName);
+                });
+            });
+
+            // Langue
+            if (langSelect) {
+                langSelect.value = savedLang;
+                langSelect.addEventListener('change', (e) => {
+                    const newLang = e.target.value;
+                    localStorage.setItem('appLang', newLang);
+                    applyTranslations(newLang);
+                });
+            }
+
+            // Thème
+            if (themeSwitch) {
+                themeSwitch.addEventListener('change', toggleTheme);
+            }
+
+            // Volume
+            if (volumeSlider) {
+                volumeSlider.addEventListener('input', handleVolumeChange); // Utiliser 'input' pour une mise à jour en temps réel
+                volumeSlider.addEventListener('change', handleVolumeChange);
+            }
+            if (muteBtn) {
+                muteBtn.addEventListener('click', toggleMute);
+            }
+
+            // Copie du Code Promo
+            const copyMessage = document.getElementById('copyMessage');
+            document.getElementById('copyPromo').addEventListener('click', () => {
+                copyText(promoCodeValue, copyMessage);
+            });
+            document.getElementById('copyBubbleCode').addEventListener('click', () => {
+                copyText(promoCodeValue, copyMessage);
+            });
+
+            // Simulateur de Dés
+            rollBtn.addEventListener('click', () => {
+                // Réinitialiser l'état visuel des dés
+                die1.classList.remove('hidden-die');
+                die2.classList.remove('hidden-die');
+                die1.textContent = '?';
+                die2.textContent = '?';
+                spinDice();
+            });
+        });
+    </script>
+</body>
+</html>
